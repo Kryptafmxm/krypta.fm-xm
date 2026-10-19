@@ -1,0 +1,16 @@
+{
+"name": "Nasze Radio Internetowe",
+"short_name": "Nasze Radio",
+"start_url": "index.html",
+"display": "standalone",
+"background_color": "#1e1e2e",
+"theme_color": "#1e1e2e",
+"orientation": "portrait",
+"icons": [
+{
+"src": "logo.png",
+"sizes": "512x512",
+"type": "image/png"
+}
+]
+}

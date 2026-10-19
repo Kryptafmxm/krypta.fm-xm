@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nasze Radio</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e1e2e">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .player-card {
+            background: #252538;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 320px;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        h1 { font-size: 1.6rem; margin: 5px 0; color: #fff; }
+        .station-sub { color: #a6adc8; font-size: 0.9rem; margin-top: 0; margin-bottom: 20px; }
+        
+        .track-box {
+            background: #181825;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #track-info {
+            color: #f5c2e7;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        button {
+            background: #cba6f7;
+            border: none;
+            color: #11111b;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            width: 100%;
+        }
+        button:hover { background: #b4befe; transform: scale(1.02); }
+        button:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+<div class="player-card">
+    <!-- Twoje logo (wgraj plik logo.png do folderu z aplikacją) -->
+    <img src="logo.png" alt="Logo Radia" class="logo" onerror="this.src='https://flaticon.com'">
+    
+    <h1>Nasze Radio</h1>
+    <div class="station-sub">Strumień na żywo</div>
+    
+    <div class="track-box">
+        <span id="track-info">Wczytywanie informacji...</span>
+    </div>
+    
+    <!-- TUTAJ PODMIEŃ ADRES URL: Wklej swój adres strumienia radiowego zamiast poniższego linku open.fm -->
+    <audio id="radio-player" src="https://krypta.ismyradio.com/"></audio>
+    
+    <button id="play-btn">ODTWÓRZ</button>
+</div>
+
+<script>
+    const player = document.getElementById('radio-player');
+    const btn = document.getElementById('play-btn');
+    const trackInfo = document.getElementById('track-info');
+
+    // ADRES DO METADANYCH: Jeśli masz link do statusu piosenek z serwera, wklej go tutaj:
+    const STATS_URL = 'https://vstg.space'; 
+
+    async function updateTrackMetadata() {
+        try {
+            const response = await fetch(STATS_URL);
+            if (!response.ok) throw new Error('Brak odpowiedzi sieci');
+            const data = await response.json();
+            
+            if(data.icestats && data.icestats.source) {
+                const source = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
+                trackInfo.textContent = source.title || "Muzyka bez przerw";
+            }
+        } catch (error) {
+            trackInfo.textContent = "Słuchasz Naszego Radia";
+        }
+    }
+
+    setInterval(updateTrackMetadata, 10000);
+    updateTrackMetadata();
+
+    btn.addEventListener('click', () => {
+        if (player.paused) {
+            player.play().then(() => {
+                btn.textContent = 'PAUZA';
+                btn.style.background = '#f38ba8';
+            }).catch(err => console.error("Błąd odtwarzania:", err));
+        } else {
+            player.pause();
+            btn.textContent = 'ODTWÓRZ';
+            btn.style.background = '#cba6f7';
+        }
+    });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js');
+        });
+    }
+</script>
+
+</body>
+</html>
